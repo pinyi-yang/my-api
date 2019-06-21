@@ -19,19 +19,15 @@ app.get('/users', function(req, res) {
     });
 });
 
-//* GET /users/:email read
-app.get('/users/:email', function(req, res) {
-    console.log(req.params.email);
+//* GET /users/:id read
+app.get('/users/:id', function(req, res) {
     db.user.findOne({
-        where: {codeid: req.params.email.split('@')[0].slice(Math.floor(req.params.email.split('@')[0].length/2)).split('').reverse().join('')}
+        where: {id : req.params.id}
     })
     .then(function(data) {
         res.json(data);
     });
 });
-
-
-
 
 //* POST /users create
 app.post('/users', function(req, res) {
@@ -47,10 +43,10 @@ app.post('/users', function(req, res) {
     });
 });
 
-//* DELETE /users/:email delete
-app.delete('/users/:email', function(req,res) {
+//* DELETE /users/:codeid delete
+app.delete('/users/:codeid', function(req,res) {
     db.user.destroy({
-        where: {codeid: req.params.email.split('@')[0].slice(Math.floor(req.params.email.split('@')[0].length/2)).split('').reverse().join('')}
+        where: {codeid: req.params.codeid}
     })
     .then(function(data) {
         console.log('user delete');
@@ -58,18 +54,29 @@ app.delete('/users/:email', function(req,res) {
     })
 })
 
-//* UPDATE /users/:email update
-app.put('/users/:email', function(req, res) {
+//* UPDATE /users/:codeid update
+app.put('/users/:codeid', function(req, res) {
     db.user.update({
         firstName: req.body.firstname,
         lastName: req.body.lastname,
     }, {
-        where: {codeid: req.params.email.split('@')[0].slice(Math.floor(req.params.email.split('@')[0].length/2)).split('').reverse().join('')}
+        where: {codeid: req.params.codeid}
     })
     .then(function() {
-        console.log('updated user info');
-        res.redirect('/users/'+ req.params.email);
+        db.user.findOne({
+            where: { codeid : req.params.codeid }
+        })
+        .then(function(data){
+            let id = data.id;
+            console.log('the id is ' + id);
+            res.redirect('/users/' + id);
+        });
     })
+    
+    // .then(function(id) {
+    //     console.log('updated user info');
+    //     res.redirect('/users/'+ id);
+    // })
 })
 
 app.listen('3000', function() {
